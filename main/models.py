@@ -2,6 +2,7 @@ from django.db import models
 
 
 class TelegramUser(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True, verbose_name="Дата регистрации")
     telegram_id = models.BigIntegerField(unique=True, verbose_name="Telegram ID")
     telegram_username = models.CharField(max_length=64, verbose_name="Telegram Юзернейм", null=True, blank=True)
 
