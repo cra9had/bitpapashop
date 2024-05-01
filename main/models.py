@@ -45,31 +45,39 @@ class Product(models.Model):
     catalog = models.ForeignKey(Catalog, on_delete=models.CASCADE, verbose_name="Каталог")
     name = models.CharField(verbose_name="Название товара", max_length=32)
     price_rub = models.IntegerField(verbose_name="Стоимость", help_text="в руб.")
-    body = models.TextField(verbose_name="Содержимоё", max_length=4096)
+
+    def in_stock(self) -> int:
+        return self.content.filter(is_sold=False).count()
 
     class Meta:
         verbose_name = "Товар"
         verbose_name_plural = "Товары"
 
     def __str__(self):
-        return f"{self.name} | {self.price_rub}"
+        return f"{self.name} | {self.price_rub} руб. | {self.in_stock()} шт."
+
+
+class ProductContent(models.Model):
+    body = models.TextField(verbose_name="Содержимое", max_length=4096)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товар", related_name="content")
+    is_sold = models.BooleanField(verbose_name="Продан", default=False)
 
 
 class TelegramAccount(models.Model):
     """
     Телеграм аккаунт для обналичивания денег bitpapa
-        """
+    """
     session = models.FileField(verbose_name="Сессия telethon")
     json = models.FileField(verbose_name="Json файл")
     is_banned = models.BooleanField(default=False, verbose_name="Забанен")
-    balance = models.IntegerField(verbose_name="Баланс bitpapa", default=0)
+    balance = models.IntegerField(verbose_name="Баланс bitpapa", default=0, help_text="btc")
 
     class Meta:
         verbose_name = "Телеграм аккаут"
         verbose_name_plural = "Телеграм аккаунты"
 
     def __str__(self):
-        return f"{self.session.name}"
+        return f"{self.session.name} - {self.balance} btc"
 
 
 class Order(models.Model):
