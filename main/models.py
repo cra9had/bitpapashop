@@ -81,12 +81,20 @@ class TelegramAccount(models.Model):
 
 
 class Order(models.Model):
+    STATUSES = (
+        ("waiting", "В ожидании"),
+        ("in_process", "Обналичивается"),
+        ("bad_code", "Плохой код"),
+        ("success", "Выполнен")
+    )
+
     date_created = models.DateTimeField(verbose_name="Дата создания", auto_now_add=True)
     product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name="Товар")
     buyer = models.ForeignKey(TelegramUser, on_delete=models.PROTECT, verbose_name="Покупатель")
     order_number = models.IntegerField(verbose_name="Номер заказа", default=0)
     bitpapa_account = models.ForeignKey(TelegramAccount, on_delete=models.PROTECT, verbose_name="Обналичил аккаунт",
                                         null=True, blank=True)
+    order_status = models.CharField(verbose_name="Статус заказа", choices=STATUSES, default="waiting", max_length=32)
     transaction = models.ForeignKey(Transaction, verbose_name="Транзакция", on_delete=models.PROTECT)
 
     class Meta:
