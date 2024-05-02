@@ -85,7 +85,8 @@ class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name="Товар")
     buyer = models.ForeignKey(TelegramUser, on_delete=models.PROTECT, verbose_name="Покупатель")
     order_number = models.IntegerField(verbose_name="Номер заказа", default=0)
-    bitpapa_account = models.ForeignKey(TelegramAccount, on_delete=models.PROTECT, verbose_name="Обналичил аккаунт")
+    bitpapa_account = models.ForeignKey(TelegramAccount, on_delete=models.PROTECT, verbose_name="Обналичил аккаунт",
+                                        null=True, blank=True)
     transaction = models.ForeignKey(Transaction, verbose_name="Транзакция", on_delete=models.PROTECT)
 
     class Meta:
