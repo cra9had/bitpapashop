@@ -1,4 +1,5 @@
 import asyncio
+import utils.db
 import logging
 from aiogram import Bot, Dispatcher
 from handlers import admin
