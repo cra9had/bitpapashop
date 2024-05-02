@@ -20,7 +20,7 @@ class Transaction(models.Model):
     amount_rub = models.IntegerField(verbose_name="Сумма в руб")
     amount_btc = models.DecimalField(verbose_name="Сумма в btc", max_digits=10, decimal_places=8)
     bitpapa_code = models.CharField(verbose_name="Код bitpapa", max_length=1024, null=True, blank=True)
-    is_confirmed = models.BooleanField(verbose_name="Подтверждена")
+    is_confirmed = models.BooleanField(verbose_name="Подтверждена", default=False)
 
     class Meta:
         verbose_name = "Транзакция"
