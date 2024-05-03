@@ -71,6 +71,7 @@ class TelegramAccount(models.Model):
     json = models.FileField(verbose_name="Json файл", upload_to="media/")
     is_banned = models.BooleanField(default=False, verbose_name="Забанен")
     balance = models.IntegerField(verbose_name="Баланс bitpapa", default=0, help_text="btc")
+    is_free = models.BooleanField(verbose_name="Свободный", default=True)
 
     class Meta:
         verbose_name = "Телеграм аккаут"
