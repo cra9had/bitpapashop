@@ -1,4 +1,5 @@
 from django.db import models
+from .services import rub_to_btc
 
 
 class TelegramUser(models.Model):
@@ -70,7 +71,7 @@ class TelegramAccount(models.Model):
     session = models.FileField(verbose_name="Сессия telethon", upload_to="media/")
     json = models.FileField(verbose_name="Json файл", upload_to="media/")
     is_banned = models.BooleanField(default=False, verbose_name="Забанен")
-    balance = models.IntegerField(verbose_name="Баланс bitpapa", default=0, help_text="btc")
+    balance = models.IntegerField(verbose_name="Баланс btc", default=0, help_text="btc")
     is_free = models.BooleanField(verbose_name="Свободный", default=True)
 
     class Meta:
@@ -104,8 +105,8 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.order_number = 13445 - self.pk
-        super().__init__(args, kwargs)
+            self.order_number = 13445 - 1
+        super(Order, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"Заказ #{self.order_number}"
