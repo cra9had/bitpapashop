@@ -160,6 +160,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+BITPAPA_API_KEY = "ws9xwNJt8Rxv6H1F4zSK"
 
 STATIC_URL = 'static/'
 MEDIA_DIR = os.path.join(BASE_DIR, 'media')
