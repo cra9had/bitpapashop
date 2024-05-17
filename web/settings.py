@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=8=mzwyq+wwrwzei%allx+o158gs%#p*qoph3-v1#%v6k5f%m$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -39,9 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'main',
-
-    'django_rq',
-
 ]
 
 MIDDLEWARE = [
@@ -103,47 +100,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-
-RQ_QUEUES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-        'USERNAME': '',
-        'PASSWORD': '',
-        'DEFAULT_TIMEOUT': 360,
-        'REDIS_CLIENT_KWARGS': {    # Eventual additional Redis connection arguments
-            'ssl_cert_reqs': None,
-        },
-    },
-    'with-sentinel': {
-        'SENTINELS': [('localhost', 26736), ('localhost', 26737)],
-        'MASTER_NAME': 'redismaster',
-        'DB': 0,
-        # Redis username/password
-        'USERNAME': 'redis-user',
-        'PASSWORD': 'secret',
-        'SOCKET_TIMEOUT': 0.3,
-        'CONNECTION_KWARGS': {  # Eventual additional Redis connection arguments
-            'ssl': True
-        },
-        'SENTINEL_KWARGS': {    # Eventual Sentinel connection arguments
-            # If Sentinel also has auth, username/password can be passed here
-            'username': 'sentinel-user',
-            'password': 'secret',
-        },
-    },
-    'high': {
-        'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379/0'), # If you're on Heroku
-        'DEFAULT_TIMEOUT': 500,
-    },
-    'low': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-    }
-}
 
 
 # Internationalization

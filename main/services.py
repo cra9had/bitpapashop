@@ -8,4 +8,4 @@ def rub_to_btc(rub: int) -> Decimal:
         "Accept": "application/json",
         "X-Access-Token": settings.BITPAPA_API_KEY,
     })
-    return Decimal(rub) / Decimal(response.json()["rates"]["BTC_RUB"])
+    return round(Decimal(rub) / Decimal(response.json()["rates"]["BTC_RUB"]), 8)

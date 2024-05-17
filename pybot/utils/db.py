@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import List
 
 import django
@@ -32,5 +33,20 @@ async def get_product(pk: int) -> Product:
     return Product.objects.get(pk=pk)
 
 
-async def create_transaction(pk: int) -> Transaction:
-    return Transaction.objects.filter()
+async def create_transaction(telegram_id: int, amount_rub: int, amount_btc: Decimal, bitpapa_code: str) -> Transaction:
+    user = TelegramUser.objects.get(telegram_id=telegram_id)
+    return Transaction.objects.create(
+        telegram_user=user,
+        amount_rub=amount_rub,
+        amount_btc=amount_btc,
+        bitpapa_code=bitpapa_code,
+    )
+
+
+async def create_order(telegram_id: int, product: Product, trx: Transaction) -> Order:
+    user = TelegramUser.objects.get(telegram_id=telegram_id)
+    return Order.objects.create(
+        buyer=user,
+        product=product,
+        transaction=trx
+    )

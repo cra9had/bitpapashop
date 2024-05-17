@@ -104,9 +104,10 @@ class Order(models.Model):
         verbose_name_plural = "Заказы"
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            self.order_number = 13445 - 1
         super(Order, self).save(*args, **kwargs)
+        if self.order_number == 0:
+            self.order_number = 13247 + self.pk
+            self.save()
 
     def __str__(self):
         return f"Заказ #{self.order_number}"

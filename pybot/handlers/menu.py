@@ -101,10 +101,28 @@ async def payform(call: CallbackQuery, state: FSMContext):
     amount_btc = rub_to_btc(product.price_rub)
     await state.set_data({
         "amount_btc": amount_btc,
+        "amount_rub": product.price_rub,
+        "product": product,
         "reserve_time": time.time()
     })
     await call.message.answer(f"""
 Создайте одноразовый код через @bitpapa_bot строго на сумму <b>{amount_btc} btc</b> и пришлите его, чтобы оплатить товар.
-Курс заморожен на 10 минут
+Курс заморожен на <b>10 минут</b>
 """)    # TODO: вынести минуты в админку
     await state.set_state(MainStatesGroup.sending_bitpapa_code)
+
+
+@router.message(MainStatesGroup.sending_bitpapa_code)
+async def on_bitpapa_code(message: Message, state: FSMContext):
+    data = await state.get_data()
+    if time.time() - data["reserve_time"] > 60*10:    # TODO: 10 min
+        await message.answer("Курс устарел!")
+        return
+    if not message.text.startswith("https://t.me/bitpapa_bot?start=papa_code_"):
+        await message.answer("Укажите валидный код. Получить его можно здесь: @bitpapabot")
+        return
+
+    else:
+        trx = await db.create_transaction(message.chat.id, data.get("amount_rub"), data.get("amount_btc"), message.text)
+        order = await db.create_order(message.chat.id, data.get("product"), trx)
+

@@ -1,4 +1,7 @@
 import asyncio
+
+from aiogram.enums import ParseMode
+
 import utils.db
 import logging
 from aiogram import Bot, Dispatcher
@@ -6,7 +9,7 @@ from handlers import admin, menu
 
 
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token="6981223922:AAEt9MEmCLrZ0jlXP36TJRQf7iFKcZ7KG4Y")
+bot = Bot(token="6981223922:AAEt9MEmCLrZ0jlXP36TJRQf7iFKcZ7KG4Y", parse_mode=ParseMode.HTML)
 dp = Dispatcher()
 
 
