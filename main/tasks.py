@@ -3,11 +3,14 @@ import json
 import time
 from typing import Literal
 
+import requests
 from asgiref.sync import sync_to_async
+from celery import shared_task
 from loguru import logger
+from django.conf import settings
 from telethon import TelegramClient
 
-from .models import Order, TelegramAccount
+from main.models import Order, TelegramAccount, ProductContent
 
 
 def parse_json_session(json_path: str) -> dict:
@@ -41,9 +44,17 @@ async def is_paid(client: TelegramClient, order: Order) -> bool:
 
     if not amount_matched:
         logger.warning(f"Заказ: {order.pk}. Сумма не совпала!")
+        send_telegram_message(
+            order.buyer.telegram_id,
+            "Сумма кода не совпала! Оплатите товар заново или обратитесь к менеджеру."
+        )
 
     elif not code_success:
         logger.warning(f"Заказ: {order.pk}. Код уже активирован!")
+        send_telegram_message(
+            order.buyer.telegram_id,
+            "Код был активирован кем-то другим..."
+        )
 
     return code_success and amount_matched
 
@@ -59,10 +70,31 @@ def set_order_status(order: Order, account: TelegramAccount, status: Literal["su
     if status == "success":
         order.transaction.is_confirmed = True
         order.transaction.save()
-        logger.warning(f"Заказ {order.pk} выполнен!")
+        content = ProductContent.objects.get(product=order.product)
+        content.is_sold = True
+        content.save()
+        account.balance += order.transaction.amount_btc
+        account.save()
+        send_telegram_message(
+            order.buyer.telegram_id,
+            f"Заказ оплачен успешно! Вот ваш товар: \n\n{content}"
+        )
+        send_telegram_message(
+            settings.ADMIN_TELEGRAM_ID,
+            f"Заказ #{order.order_number}. Код на сумму {order.transaction.amount_btc} успешно обналичен."
+        )
+        logger.info(f"Заказ {order.pk} выполнен!")
     order.bitpapa_account = account
     order.order_status = status
     order.save()
+
+
+def send_telegram_message(telegram_id: int, message: str) -> None:
+    url_req = "https://api.telegram.org/bot" + settings.TELEGRAM_BOT_TOKEN + "/sendMessage"
+    requests.get(url_req, params={
+        "chat_id": telegram_id,
+        "text": message
+    })
 
 
 async def activate_bitpapa_code(account: TelegramAccount, order: Order, code: str):
@@ -88,7 +120,9 @@ async def activate_bitpapa_code(account: TelegramAccount, order: Order, code: st
     await change_account_status(account, True)
 
 
-def use_bitpapa_code(order: Order):
+@shared_task
+def use_bitpapa_code(order_pk: int):
+    order = Order.objects.get(pk=order_pk)
     if order.transaction.is_confirmed:
         logger.warning("Код bitpapa уже подтверждён!")
         return
@@ -101,13 +135,18 @@ def use_bitpapa_code(order: Order):
     else:
         code = f"/start {order.transaction.bitpapa_code.replace('https://t.me/bitpapa_bot?start=', '')}"
 
+    notification_sent = False
     while True:
         account = TelegramAccount.objects.filter(is_banned=False, is_free=True).first()
         if account:
             break
 
-        if not TelegramAccount.objects.filter(is_banned=False).exists():
-            ...     # TODO: отправить уведолмние, о нехватки аккаунтов.
+        if not TelegramAccount.objects.filter(is_banned=False).exists() and not notification_sent:
+            send_telegram_message(settings.ADMIN_TELEGRAM_ID,
+                                  "К сожалению у нас нет свободных аккаунтов. Подождите пожалуйста 10 минут.")
+            send_telegram_message(settings.ADMIN_TELEGRAM_ID,
+                                  "Нет свободных телеграм аккаунтов для обналичивания заказа!")
+            notification_sent = True
 
         time.sleep(5)
 
@@ -117,5 +156,5 @@ def use_bitpapa_code(order: Order):
         logger.error(e)
         account.is_banned = True
         account.save()
-        use_bitpapa_code(order)
+        use_bitpapa_code(order.pk)
     ...

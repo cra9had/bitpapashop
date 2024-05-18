@@ -1,15 +1,17 @@
 import asyncio
+import os
 
 from aiogram.enums import ParseMode
-
+from dotenv import load_dotenv, find_dotenv
 import utils.db
 import logging
 from aiogram import Bot, Dispatcher
 from handlers import admin, menu
 
 
+load_dotenv(find_dotenv(".env"))
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token="6981223922:AAEt9MEmCLrZ0jlXP36TJRQf7iFKcZ7KG4Y", parse_mode=ParseMode.HTML)
+bot = Bot(token=os.getenv("TELEGRAM_BOT_TOKEN"), parse_mode=ParseMode.HTML)
 dp = Dispatcher()
 
 

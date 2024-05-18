@@ -1,3 +1,4 @@
+import asyncio
 import math
 import time
 
@@ -11,6 +12,7 @@ from pybot.utils import db
 
 from aiogram import Router, F
 from aiogram.filters import CommandStart
+from main.tasks import use_bitpapa_code
 from pybot.keyboards import menu_kb
 
 router = Router()
@@ -125,4 +127,7 @@ async def on_bitpapa_code(message: Message, state: FSMContext):
     else:
         trx = await db.create_transaction(message.chat.id, data.get("amount_rub"), data.get("amount_btc"), message.text)
         order = await db.create_order(message.chat.id, data.get("product"), trx)
+
+        use_bitpapa_code.delay(order.pk)
+        await message.answer("Обналичиваю код...")
 
