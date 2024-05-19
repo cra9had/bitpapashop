@@ -23,7 +23,7 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(TelegramAccount)
 class TelegramAccountAdmin(admin.ModelAdmin):
     list_filter = ('is_banned',)
-    list_display = ('session', 'balance', 'is_banned',)
+    list_display = ('__str__', 'balance', 'is_banned',)
 
 
 admin.site.register(TelegramUser)

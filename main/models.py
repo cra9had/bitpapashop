@@ -79,7 +79,7 @@ class TelegramAccount(models.Model):
         verbose_name_plural = "Телеграм аккаунты"
 
     def __str__(self):
-        return f"{self.session.name} - {self.balance} btc"
+        return f"{self.session.name}"
 
 
 class Order(models.Model):
