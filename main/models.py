@@ -12,7 +12,7 @@ class TelegramUser(models.Model):
         verbose_name_plural = "Пользователи бота"
 
     def __str__(self):
-        return f"ID {self.telegram_id}" if self.telegram_id else f"@{self.telegram_username}"
+        return f"ID {self.telegram_id}" if not self.telegram_username else f"@{self.telegram_username}"
 
 
 class Transaction(models.Model):

@@ -45,14 +45,14 @@ async def is_paid(client: TelegramClient, order: Order) -> bool:
     if not amount_matched:
         logger.warning(f"Заказ: {order.pk}. Сумма не совпала!")
         send_telegram_message(
-            order.buyer.telegram_id,
+            await get_buyer_telegram_id(order),
             "Сумма кода не совпала! Оплатите товар заново или обратитесь к менеджеру."
         )
 
     elif not code_success:
         logger.warning(f"Заказ: {order.pk}. Код уже активирован!")
         send_telegram_message(
-            order.buyer.telegram_id,
+            await get_buyer_telegram_id(order),
             "Код был активирован кем-то другим..."
         )
 
@@ -95,6 +95,11 @@ def send_telegram_message(telegram_id: int, message: str) -> None:
         "chat_id": telegram_id,
         "text": message
     })
+
+
+@sync_to_async
+def get_buyer_telegram_id(order: Order) -> int:
+    return order.buyer.telegram_id
 
 
 async def activate_bitpapa_code(account: TelegramAccount, order: Order, code: str):
@@ -154,6 +159,7 @@ def use_bitpapa_code(order_pk: int):
         asyncio.run(activate_bitpapa_code(account, order, code))
     except Exception as e:
         logger.error(e)
+        raise e
         account.is_banned = True
         account.save()
         use_bitpapa_code(order.pk)
